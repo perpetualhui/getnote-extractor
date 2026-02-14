@@ -166,6 +166,279 @@ python src/get_note.py
 
 ---
 
+## 🚨 故障排查
+
+### 1. ModuleNotFoundError: No module named 'playwright'
+
+**错误信息**：
+```
+ModuleNotFoundError: No module named 'playwright'
+```
+
+**原因分析**：
+运行代码的 Python 环境中没有安装 playwright 模块，或者安装到了不同的 Python 环境。
+
+**解决方案**：
+
+```bash
+# 1. 确认当前 Python 环境
+python --version
+where python  # Windows
+which python  # macOS/Linux
+
+# 2. 使用当前环境的 pip 安装 playwright
+python -m pip install --upgrade pip
+python -m pip install playwright --force-reinstall
+
+# 3. 验证安装
+python -c "import playwright; from playwright.sync_api import sync_playwright; print('✅ 安装成功')"
+```
+
+**VS Code 用户**：
+- 检查左下角的 Python 解释器版本
+- 点击解释器版本，选择正确的 Python 环境
+- 重启 VS Code 终端后重新安装
+
+---
+
+### 2. Executable doesn't exist at ms-playwright/chromium-xxx
+
+**错误信息**：
+```
+playwright._impl._errors.Error: BrowserType.launch: Executable doesn't exist at
+C:\Users\...\AppData\Local\ms-playwright\chromium-1208\chrome-win64\chrome.exe
+```
+
+**原因分析**：
+Playwright 的浏览器驱动（可执行文件）未下载到本地。
+
+**解决方案**：
+
+```bash
+# 方案1：安装 Playwright 浏览器驱动
+python -m playwright install chrome
+
+# 方案2：如果系统已安装 Chrome，指定系统 Chrome 路径
+# 在代码中使用 launch_persistent_context() 参数：
+# executable_path=r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+```
+
+**注意**：本项目已内置自动查找系统 Chrome 路径的功能（`get_system_chrome_path()`），一般无需手动指定。
+
+---
+
+### 3. "chrome" is already installed on the system!
+
+**错误信息**：
+```
+ATTENTION: "chrome" is already installed on the system!
+"chrome" installation is not hermetic; installing newer version
+requires *removal* of a current installation first.
+```
+
+**原因分析**：
+系统中已安装 Chrome，与 Playwright 专属驱动冲突。
+
+**解决方案**：
+
+```bash
+# 1. 关闭所有 Chrome 窗口和进程
+# 使用任务管理器结束所有 chrome.exe 进程
+
+# 2. 强制重装 Playwright 驱动
+python -m playwright install --force chrome
+```
+
+---
+
+### 4. net::ERR_NAME_NOT_RESOLVED
+
+**错误信息**：
+```
+playwright._impl._errors.Error: Page.goto: net::ERR_NAME_NOT_RESOLVED
+at https://xn--get-x69d907a0c738ahj2dpuibukkj8a/
+```
+
+**原因分析**：
+配置的 URL 地址无效或格式错误。
+
+**解决方案**：
+
+1. **手动验证 URL**：
+   - 在浏览器中手动访问 Get 笔记官网
+   - 确认能正常打开后，复制地址栏的完整 URL
+
+2. **检查 URL 格式**：
+```json
+// ❌ 错误：缺少协议前缀
+"getnote_url": "www.biji.com"
+
+// ❌ 错误：直接写中文
+"getnote_url": "Get笔记官网"
+
+// ✅ 正确：完整的 HTTPS URL
+"getnote_url": "https://www.biji.com/chat"
+```
+
+3. **在代码中添加验证**：
+```python
+if not getnote_url.startswith(("http://", "https://")):
+    raise ValueError("URL 必须以 http:// 或 https:// 开头")
+```
+
+---
+
+### 5. 用户数据目录被占用
+
+**错误信息**：
+```
+Error: User data directory is already in use
+```
+
+**原因分析**：
+Chrome 用户数据目录同时被多个进程占用（运行脚本时 Chrome 窗口未关闭）。
+
+**解决方案**：
+
+```bash
+# 1. 关闭所有 Chrome 窗口
+# 2. 检查是否有残留的 Chrome 进程
+tasklist | findstr chrome  # Windows
+ps aux | grep chrome      # macOS/Linux
+
+# 3. 强制结束残留进程（可选）
+taskkill /F /IM chrome.exe  # Windows
+killall Chrome             # macOS
+```
+
+**代码中的提示**：
+脚本运行时会自动提示"请确保已关闭所有 Chrome 窗口，3 秒后继续..."，请遵循提示操作。
+
+---
+
+### 6. TypeError: unexpected keyword argument
+
+**错误信息**：
+```
+TypeError: BrowserType.launch_persistent_context() got an unexpected
+keyword argument 'storage_state_persist'
+```
+
+**原因分析**：
+使用了 Playwright 不支持的参数名（通常是拼写错误）。
+
+**解决方案**：
+
+```python
+# ❌ 错误参数
+browser = p.chromium.launch_persistent_context(
+    user_data_dir=chrome_user_data_dir,
+    storage_state_persist=True  # 此参数不存在
+)
+
+# ✅ 正确写法：删除错误参数
+browser = p.chromium.launch_persistent_context(
+    user_data_dir=chrome_user_data_dir,
+    executable_path=system_chrome_path,
+    headless=False,
+    args=["--start-maximized"]
+)
+```
+
+**常见错误参数**：
+- `storage_state_persist` → 应删除（launch_persistent_context 默认持久化）
+- `storage_state_persist=True` → 应删除（拼写错误）
+
+---
+
+### 7. CSS 选择器定位失败
+
+**错误信息**：
+```
+TimeoutError: waiting for selector ".article-content" failed
+```
+
+**原因分析**：
+页面元素选择器与实际 HTML 结构不匹配。
+
+**解决方案**：
+
+1. **使用浏览器开发者工具检查元素**：
+   ```
+   1. 在 Chrome 中打开 Get 笔记页面
+   2. 按 F12 打开开发者工具
+   3. 点击"元素选择器"（左上角箭头图标）
+   4. 点击页面上的文章内容
+   5. 查看 Elements 面板中的 HTML 结构
+   6. 复制正确的 class 或 id
+   ```
+
+2. **常见选择器格式**：
+```css
+/* class 选择器 */
+.article-content
+.content-wrapper
+
+/* id 选择器 */
+#article
+#main-content
+
+/* 组合选择器 */
+div.article-content > p
+article.content-body
+```
+
+3. **在 config.json 中更新选择器**：
+```json
+{
+  "article_selector": ".actual-content-class",
+  "title_selector": ".actual-title-class"
+}
+```
+
+---
+
+### 8. 跨平台路径问题
+
+**问题现象**：
+- Windows 上提示路径不存在
+- macOS/Linux 上找不到 Chrome
+
+**解决方案**：
+
+本项目已内置跨平台路径检测：
+
+```python
+# 自动检测系统 Chrome 路径（src/get_note.py）
+def get_system_chrome_path():
+    system = platform.system()
+
+    if system == "Windows":
+        possible_paths = [
+            r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+            r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+        ]
+    elif system == "Darwin":  # macOS
+        possible_paths = [
+            "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+        ]
+    else:  # Linux
+        possible_paths = [
+            "/usr/bin/google-chrome",
+            "/usr/bin/chromium-browser"
+        ]
+```
+
+**手动查找路径**：
+
+| 平台 | 命令 |
+|------|------|
+| Windows | 在 Chrome 地址栏输入 `chrome://version` |
+| macOS | `echo ~/Library/Application\ Support/Google/Chrome` |
+| Linux | `echo ~/.config/google-chrome` |
+
+---
+
 ## 常见问题
 
 ### Q1: 运行时提示 "未找到 Chrome 浏览器"
