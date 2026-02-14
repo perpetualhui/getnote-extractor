@@ -1,0 +1,7 @@
+{
+  "getnote_url": "https://www.biji.com/chat",
+  "chrome_user_data_dir": "",
+  "export_path": "./data/getnote_articles.txt",
+  "article_selector": ".article-content",
+  "title_selector": ".article-title"
+}
