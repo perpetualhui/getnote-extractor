@@ -1,18 +1,14 @@
-<div align="center">
+# GetNote Extractor
 
-# 📝 GetNote Extractor v2.0
+<div align="center">
 
 **Get笔记知识库批量提取工具**
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
+![License](https://badge.fuchsia.io/badge/License-MIT-green.svg)
 ![Playwright](https://img.shields.io/badge/Playwright-Latest-orange.svg)
 
-[功能特点](#功能特点) • [快速开始](#快速开始) • [使用方法](#使用方法) • [常见问题](#常见问题)
-
----
-
-**⭐ 如果这个项目对你有帮助，请给个 Star！**
+[功能特点](#功能特点) &centerdot; [快速开始](#快速开始) &centerdot; [使用方法](#使用方法) &centerdot; [常见问题](#常见问题)
 
 </div>
 
@@ -20,13 +16,13 @@
 
 ## 功能特点
 
-- 🚀 **并行提取** - 多线程并发，默认3个并发，速度提升3-5倍
-- 💾 **断点续传** - 自动跳过已提取的文章，支持随时中断和继续
-- 📄 **Markdown 输出** - 保存为结构化的 Markdown 文件
-- 🔄 **自动分页** - 自动处理所有页面，无需手动翻页
-- 📁 **智能命名** - 使用博主名称命名文件夹，自动处理重名冲突
-- 🛑 **优雅停止** - `Ctrl+C` 等待当前批次完成后安全退出
-- 📊 **实时统计** - 显示提取进度、速度和用时统计
+- **并行提取** - 多线程并发，默认3个并发，速度提升3-5倍
+- **断点续传** - 自动跳过已提取的文章，支持随时中断和继续
+- **Markdown 输出** - 保存为结构化的 Markdown 文件，便于阅读和管理
+- **自动分页** - 自动处理所有页面，无需手动翻页
+- **智能命名** - 使用博主名称命名文件夹，自动处理重名冲突
+- **优雅停止** - Ctrl+C 等待当前批次完成后安全退出
+- **实时统计** - 显示提取进度、速度和用时统计
 
 ---
 
@@ -36,7 +32,7 @@
 
 ```bash
 pip install -r requirements.txt
-python -m playwright install chrome
+playwright install chrome
 ```
 
 ### 2. 配置
@@ -149,7 +145,7 @@ python src/get_note.py <知识库URL或ID> [输出目录] [最大页数] [最大
 
 ---
 
-## 性能
+## 性能参考
 
 | 并发数 | 速度 | 适用场景 |
 |--------|------|----------|
@@ -161,15 +157,15 @@ python src/get_note.py <知识库URL或ID> [输出目录] [最大页数] [最大
 
 ## 停止和继续
 
-**停止提取：** 按 `Ctrl+C`，工具会等待当前批次完成后安全退出
+**停止提取**：按 `Ctrl+C`，工具会等待当前批次完成后安全退出
 
-**继续提取：** 重新运行相同的命令，工具会自动跳过已提取的文章
+**继续提取**：重新运行相同的命令，工具会自动跳过已提取的文章
 
 ---
 
 ## 常见问题
 
-### 1. Chrome 用户数据目录在哪？
+### Chrome 用户数据目录在哪？
 
 **Windows:**
 1. 打开 Chrome，地址栏输入 `chrome://version`
@@ -183,16 +179,16 @@ echo ~/Library/Application\ Support/Google/Chrome  # macOS
 echo ~/.config/google-chrome                       # Linux
 ```
 
-### 2. 提示"用户数据目录被占用"
+### 提示"用户数据目录被占用"？
 
 1. 关闭所有 Chrome 窗口
 2. 检查任务管理器，结束所有 Chrome 进程
 
-### 3. 提取速度慢
+### 提取速度慢？
 
 - 检查网络连接
 - 确保 Chrome 已登录 Get 笔记
-- 尝试降低并发数
+- 尝试调整并发数
 
 ---
 
