@@ -1,7 +1,10 @@
 {
-  "getnote_url": "https://www.biji.com/chat",
   "chrome_user_data_dir": "",
-  "export_path": "./data/getnote_articles.txt",
-  "article_selector": ".article-content",
-  "title_selector": ".article-title"
+  "说明": {
+    "chrome_user_data_dir": "Chrome 用户数据目录路径，必需",
+    "Windows": "C:\\Users\\YOUR_USERNAME\\AppData\\Local\\Google\\Chrome\\User Data",
+    "macOS": "~/Library/Application Support/Google/Chrome",
+    "Linux": "~/.config/google-chrome",
+    "其他参数": "通过命令行参数传入，无需在配置文件中设置"
+  }
 }
